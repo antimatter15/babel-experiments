@@ -26,5 +26,21 @@ export default function({ types: t }) {
         manipulateOptions(opts, parserOpts) {
             parserOpts.plugins.push("topLevelAwait");
         }
+        vistors{
+            File(path){
+                path.traverse({
+                    AwaitExpression(){
+                        checktoplevel
+                    },
+                    ExportSTatement(){
+
+                    }
+                })
+
+                if(await && export){
+                    throw error
+                }
+            }
+        }
     };
 }
