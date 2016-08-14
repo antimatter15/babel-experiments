@@ -1,0 +1,17 @@
+{
+  "name": "watlab",
+  "version": "1.0.0",
+  "description": "Like MATLAB, but with more WAT: Matrix literal syntax for Javascript.",
+  "main": "watlab.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.13.2",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-stage-1": "^6.13.0",
+    "babylon": "^6.8.4"
+  }
+}
