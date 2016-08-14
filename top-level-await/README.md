@@ -39,3 +39,6 @@ https://github.com/babel/babel/blob/master/packages/babel-helper-hoist-variables
 It seems like there's a path.hoist() method
 
 
+# To Run:
+
+	babel-node --presets es2015 transform.js

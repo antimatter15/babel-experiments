@@ -16,4 +16,4 @@ var out = pipeline.pretransform(code, {
 })
 
 
-console.log(out.transform())
+console.log(out.transform().code)
