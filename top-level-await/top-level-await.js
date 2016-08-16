@@ -6,6 +6,7 @@ plugins.topLevelAwait = function (instance) {
         return function(file, program){
             program.sourceType = this.options.sourceType;
             
+            // set state to inAsync to allow awaits
             this.state.inAsync = true;
 
             // allow strings at the top of a script
@@ -43,9 +44,10 @@ export default function({ types: t }) {
                             has_await = true;
                         }
                     },
-                    ExportNamedDeclaration(){
-                        has_export = true;
-                    }
+                    ExportDeclaration(){ has_export = true },
+                    ExportNamespaceSpecifier(){ has_export = true },
+                    ExportSpecifier(){ has_export = true },
+                    ExportDefaultSpecifier(){ has_export = true },
                 })
 
                 // fast path shortcut if there are no top-level awaits
