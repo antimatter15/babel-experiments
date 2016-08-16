@@ -7,6 +7,11 @@ plugins.topLevelAwait = function (instance) {
             program.sourceType = this.options.sourceType;
             
             this.state.inAsync = true;
+
+            // allow strings at the top of a script
+            // plus the only useful directive is "use strict"
+            // which gets added by babel anyways
+
             var allowDirectives = false;
             this.parseBlockBody(program, allowDirectives, true, tt.eof);
 
@@ -19,27 +24,59 @@ plugins.topLevelAwait = function (instance) {
     })
 }
 
-console.log(plugins)
-
 export default function({ types: t }) {
     return {
         manipulateOptions(opts, parserOpts) {
             parserOpts.plugins.push("topLevelAwait");
-        }
-        vistors{
-            File(path){
-                path.traverse({
-                    AwaitExpression(){
-                        checktoplevel
-                    },
-                    ExportSTatement(){
+        },
+        visitor: {
+            Program(path){
+                // check if this program contains top-level awaits
+                // or if it contains exports (which aren't supported)
+                var has_export = false,
+                    has_await = false;
 
+                path.traverse({
+                    AwaitExpression(path){
+                        var parent = path.getFunctionParent();
+                        if(parent.type === 'Program'){
+                            has_await = true;
+                        }
+                    },
+                    ExportNamedDeclaration(){
+                        has_export = true;
                     }
                 })
 
-                if(await && export){
-                    throw error
-                }
+                // fast path shortcut if there are no top-level awaits
+                if (!has_await) return;
+                if ( has_export) throw new SyntaxError('Modules using top level await must not have exports');
+                
+                // we need to hoist all the imports
+                var statements = [],
+                    imports = [];
+
+                path.node.body.forEach(stmt => {
+                    // hoist import statements
+                    if(t.isImportDeclaration(stmt) || t.isImportDefaultSpecifier(stmt)
+                    || t.isImportNamespaceSpecifier(stmt) || t.isImportSpecifier(stmt)){
+                        imports.push(stmt)
+                    }else{
+                        statements.push(stmt)
+                    }
+                })
+
+                // here's the actual magical mess
+                path.replaceWith(t.program(imports.concat([
+                    t.expressionStatement(t.callExpression(
+                        t.functionExpression(
+                            null, // anonymous
+                            [], // params
+                            t.blockStatement(statements), 
+                            false, // generator
+                            true), // async
+                        [])) 
+                ])))
             }
         }
     };

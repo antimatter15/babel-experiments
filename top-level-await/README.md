@@ -12,31 +12,28 @@ Turns into:
 		await fetch('http://www.google.com/')
 	})()
 
-It's (probably) nontrivial to get this approach to work with import/exports, as you'll probably need some way to hoist imports and exports
-
-
-	import _ from "lodash";
-	await fetch('http://www.example.com/')
-	export function derp(){
-		alert('yolo')
-	}
-
-This would probably be converted into something like
+This implementation automatically hoists import declarations so that they remain at the top level:
 
 	import _ from "lodash";
-	export var derp;
+	import fs from "fs-promise"
 
-	;(async function(){
-		derp = function derp(){
-			alert('yolo')
-		}
+	var text = await fs.readFile('README.md', 'utf-8')
+
+	console.log(text)
+
+This is transpiled conveniently into:
+
+	import _ from "lodash";
+	import fs from "fs-promise"
+
+	(async function(){
+		var text = await fs.readFile('README.md', 'utf-8')
+
+		console.log(text)
 	})()
 
-https://github.com/thejameskyle/babel-handbook/blob/master/translations/en/plugin-handbook.md
 
-https://github.com/babel/babel/blob/master/packages/babel-helper-hoist-variables/src/index.js
-
-It seems like there's a path.hoist() method
+The current implementation doesn't support exports. Top level awaits might interfere with the behavior of certain modules (as many of their exports may not be defined until well after the module has been loaded). Anyway, this top-level await transform is primarily useful for REPL-style interactions, as essentially a convenience to avoid wrapping things with an async IIFE (immediately invoked function expression).
 
 
 # To Run:

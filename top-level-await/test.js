@@ -1,5 +1,6 @@
-await console.log('hi')
+import _ from "lodash";
+import fs from "fs-promise"
 
-export function merp(){
+var text = await fs.readFile('README.md', 'utf-8')
 
-}
+console.log(text)
